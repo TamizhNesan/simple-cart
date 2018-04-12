@@ -15,14 +15,24 @@ import {
 } from './services/storage.service';
 import { ShoppingCartComponent } from './shopping-cart/shopping-cart.component';
 import { DeliveryOptionsService } from './services/delivery-options.service';
+import { CheckoutComponent } from './checkout/checkout.component';
+import { OrderConfirmationComponent } from './order-confirmation/order-confirmation.component';
+import { PopulatedCartRouteGuard } from './route-guards/populated-cart-route.guard';
 
 @NgModule({
-  declarations: [AppComponent, StoreFrontComponent, ShoppingCartComponent],
+  declarations: [
+    AppComponent,
+    StoreFrontComponent,
+    ShoppingCartComponent,
+    CheckoutComponent,
+    OrderConfirmationComponent
+  ],
   imports: [BrowserModule, AppRoutingModule, HttpClientModule],
   providers: [
     ProductsService,
     ShoppingCartService,
     DeliveryOptionsService,
+    PopulatedCartRouteGuard,
     LocalStorageService,
     { provide: StorageService, useClass: LocalStorageService }
   ],

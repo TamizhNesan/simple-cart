@@ -75,6 +75,14 @@ export class ShoppingCartService {
     this.storage.setItem(CART_KEY, JSON.stringify(cart));
   }
 
+  public setDeliveryOption(deliveyOption: DeliveryOption): void {
+    const cart = this.retrieve();
+    cart.deliveryOptionId = deliveyOption.id;
+    this.calculateCart(cart);
+    this.save(cart);
+    this.dispatch(cart);
+  }
+
   private dispatch(cart: ShoppingCart): void {
     this.subscribers.forEach(sub => {
       try {
