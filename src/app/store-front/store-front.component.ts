@@ -31,10 +31,16 @@ export class StoreFrontComponent implements OnInit {
     console.log(`{{product.name}} added to the cart.`);
   }
   public removeProductFromCart(product: Product): void {
-    // this.shoppingCartService.addItem(product, -1);
+    this.shoppingCartService.addItem(product, -1);
   }
 
   public productInCart(product: Product): boolean {
-    return false;
+    return Observable.create((obs: Observer<boolean>) => {
+      const sub = this.shoppingCartService.get().subscribe(cart => {
+        obs.next(cart.items.some(i => i.productId === product.id));
+        obs.complete();
+      });
+      sub.unsubscribe();
+    });
   }
 }

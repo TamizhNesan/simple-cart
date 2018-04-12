@@ -13,13 +13,16 @@ import {
   StorageService,
   LocalStorageService
 } from './services/storage.service';
+import { ShoppingCartComponent } from './shopping-cart/shopping-cart.component';
+import { DeliveryOptionsService } from './services/delivery-options.service';
 
 @NgModule({
-  declarations: [AppComponent, StoreFrontComponent],
+  declarations: [AppComponent, StoreFrontComponent, ShoppingCartComponent],
   imports: [BrowserModule, AppRoutingModule, HttpClientModule],
   providers: [
     ProductsService,
     ShoppingCartService,
+    DeliveryOptionsService,
     LocalStorageService,
     { provide: StorageService, useClass: LocalStorageService }
   ],

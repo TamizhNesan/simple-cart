@@ -5,17 +5,26 @@ import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
 
 import { Product } from '../models/product.model';
+import { CachcingServiceBase } from './caching.service';
 
 @Injectable()
-export class ProductsService {
-  constructor(private http: HttpClient) {}
+export class ProductsService extends CachcingServiceBase {
+  private products: Observable<Product[]>;
+  constructor(private http: HttpClient) {
+    super();
+  }
   public all(): Observable<Product[]> {
-    return this.http.get<Product[]>('./assets/products.json').map(response =>
-      response.map(item => {
-        const model = new Product();
-        model.updateFrom(item);
-        return model;
-      })
+    return this.cache<Product[]>(
+      () => this.products,
+      (val: Observable<Product[]>) => (this.products = val),
+      () =>
+        this.http.get<Product[]>('./assets/products.json').map(response =>
+          response.map(item => {
+            const model = new Product();
+            model.updateFrom(item);
+            return model;
+          })
+        )
     );
   }
 }

@@ -4,14 +4,18 @@ import { ShoppingCart } from '../models/shopping-cart.model';
 import { CartItem } from '../models/cart-item.model';
 import { DeliveryOption } from '../models/delivery-option.model';
 import { Observer } from 'rxjs/Observer';
+import { Observable } from 'rxjs/Observable';
+
 import { StorageService } from './storage.service';
 import { ProductsService } from './products.service';
+import { DeliveryOptionsService } from './delivery-options.service';
 
 const CART_KEY = 'cart';
 
 @Injectable()
 export class ShoppingCartService {
   private storage: Storage;
+  private subscriptionObservable: Observable<ShoppingCart>;
   private products: Product[];
   private deliveryOptions: DeliveryOption[];
   private subscribers: Array<Observer<ShoppingCart>> = new Array<
@@ -20,12 +24,31 @@ export class ShoppingCartService {
 
   constructor(
     private storageService: StorageService,
-    private productsService: ProductsService
+    private productsService: ProductsService,
+    private deliveryOptionsService: DeliveryOptionsService
   ) {
     this.storage = this.storageService.get();
     this.productsService
       .all()
       .subscribe(products => (this.products = products));
+
+    this.deliveryOptionsService
+      .all()
+      .subscribe(options => (this.deliveryOptions = options));
+
+    this.subscriptionObservable = new Observable<ShoppingCart>(
+      (observer: Observer<ShoppingCart>) => {
+        this.subscribers.push(observer);
+        observer.next(this.retrieve());
+        return () => {
+          this.subscribers = this.subscribers.filter(obs => obs !== observer);
+        };
+      }
+    );
+  }
+
+  public get(): Observable<ShoppingCart> {
+    return this.subscriptionObservable;
   }
 
   public addItem(product: Product, quantity: number): void {
@@ -79,12 +102,17 @@ export class ShoppingCartService {
   }
 
   private retrieve(): ShoppingCart {
-    console.log(`retrieve is called `);
     const cart = new ShoppingCart();
     const storedCart = this.storage.getItem(CART_KEY);
     if (storedCart) {
       cart.updateFrom(JSON.parse(storedCart));
     }
     return cart;
+  }
+
+  public empty(): void {
+    const newCart = new ShoppingCart();
+    this.save(newCart);
+    this.dispatch(newCart);
   }
 }

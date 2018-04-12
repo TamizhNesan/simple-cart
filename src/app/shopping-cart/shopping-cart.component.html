@@ -1,0 +1,37 @@
+<div class="grid-x">
+  <div class="small-12 cell">
+    <h3>
+      <i class="material-icons">shopping_basket</i>
+      Your Shopping Basket
+    </h3>
+  </div>
+</div>
+<br>
+<div class="grid-x">
+  <div class="small-12 cell">
+    <h5>
+      Sub Total ({{itemCount}} items):
+      <span class="text-red text-bold js-cart-total">
+        {{(cart | async).grossTotal | currency:'USD'}}
+      </span>
+    </h5>
+  </div>
+</div>
+<br>
+<div class="grid-x">
+  <div class="small-12 cell">
+    <a [attr.disabled]="itemCount === 0 ? true : null" routerLink="/checkout" class="success button large expanded">Proceed To Checkout</a>
+  </div>
+</div>
+<div class="grid-x">
+  <div class="small-12 cell text-center">
+    or
+  </div>
+</div>
+<div class="grid-x">
+  <div class="small-12 cell">
+    <button (click)="emptyCart()" [attr.disabled]="itemCount === 0 ? true : null" class="secondary button small expanded js-btn-empty-cart">
+      Empty shopping basket
+    </button>
+  </div>
+</div>
