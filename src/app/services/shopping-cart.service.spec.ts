@@ -7,6 +7,8 @@ import { ProductsService } from './products.service';
 import { DeliveryOptionsService } from './delivery-options.service';
 import { Product } from '../models/product.model';
 import { Observable } from 'rxjs/Observable';
+import { asyncData } from '../testing/async-observable-helpers';
+import { DeliveryOption } from '../models/delivery-option.model';
 let httpClientSpy: { get: jasmine.Spy };
 const StorageServiceSpy = jasmine.createSpyObj('StorageService', [
   'cache',
@@ -21,8 +23,13 @@ const deliveryOptionsServiceSpy = jasmine.createSpyObj(
 describe('ShoppingCartService', () => {
   beforeEach(() => {
     httpClientSpy = jasmine.createSpyObj('HttpClient', ['get']);
-    let testProducts: Product[] = [];
-    productsServiceSpy.all.and.returnValue(Observable.create(testProducts));
+    const testProducts: Product[] = [];
+    const fakeDeliveryOptions: DeliveryOption[] = [];
+    deliveryOptionsServiceSpy.all.and.returnValue(
+      asyncData(fakeDeliveryOptions)
+    );
+
+    productsServiceSpy.all.and.returnValue(asyncData(testProducts));
     TestBed.configureTestingModule({
       providers: [
         { provide: ProductsService, useValue: productsServiceSpy },

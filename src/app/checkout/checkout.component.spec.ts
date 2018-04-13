@@ -5,6 +5,9 @@ import { ProductsService } from '../services/products.service';
 import { ShoppingCartService } from '../services/shopping-cart.service';
 import { DeliveryOptionsService } from '../services/delivery-options.service';
 import { Product } from '../models/product.model';
+import { asyncData } from '../testing/async-observable-helpers';
+import { DeliveryOption } from '../models/delivery-option.model';
+import { ShoppingCart } from '../models/shopping-cart.model';
 const productsServiceSpy = jasmine.createSpyObj('ProductsService', ['all']);
 const shoppingCartServiceSpy = jasmine.createSpyObj('ShoppingCartService', [
   'get'
@@ -20,8 +23,15 @@ describe('CheckoutComponent', () => {
 
   beforeEach(
     async(() => {
-      let testProducts: Product[] = [];
-      productsServiceSpy.all.and.returnValue(testProducts);
+      const testProducts: Product[] = [];
+      const fakeDeliveryOptions: DeliveryOption[] = [];
+      productsServiceSpy.all.and.returnValue(asyncData(testProducts));
+      deliveryOptionsServiceSpy.all.and.returnValue(
+        asyncData(fakeDeliveryOptions)
+      );
+      const cart = new ShoppingCart();
+      cart.grossTotal = 0;
+      shoppingCartServiceSpy.get.and.returnValue(asyncData(cart));
       TestBed.configureTestingModule({
         declarations: [CheckoutComponent],
         providers: [

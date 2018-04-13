@@ -12,7 +12,7 @@
     <h5>
       Sub Total ({{itemCount}} items):
       <span class="text-red text-bold js-cart-total">
-        {{(cart | async).grossTotal | currency:'USD'}}
+        {{(cart | async)?.grossTotal | currency:'USD'}}
       </span>
     </h5>
   </div>

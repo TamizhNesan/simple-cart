@@ -3,9 +3,12 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { ShoppingCartComponent } from './shopping-cart.component';
 import { ProductsService } from '../services/products.service';
 import { ShoppingCartService } from '../services/shopping-cart.service';
-const productsServiceSpy = jasmine.createSpyObj('ProductsService', ['']);
+import { Product } from '../models/product.model';
+import { asyncData } from '../testing/async-observable-helpers';
+import { ShoppingCart } from '../models/shopping-cart.model';
+const productsServiceSpy = jasmine.createSpyObj('ProductsService', ['all']);
 const shoppingCartServiceSpy = jasmine.createSpyObj('ShoppingCartService', [
-  ''
+  'get'
 ]);
 
 describe('ShoppingCartComponent', () => {
@@ -14,6 +17,11 @@ describe('ShoppingCartComponent', () => {
 
   beforeEach(
     async(() => {
+      const testProducts: Product[] = [];
+      const cart = new ShoppingCart();
+      cart.grossTotal = 0;
+      shoppingCartServiceSpy.get.and.returnValue(asyncData(cart));
+      productsServiceSpy.all.and.returnValue(asyncData(testProducts));
       TestBed.configureTestingModule({
         declarations: [ShoppingCartComponent],
         providers: [
