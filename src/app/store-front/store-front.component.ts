@@ -26,9 +26,7 @@ export class StoreFrontComponent implements OnInit {
   }
 
   public addProductToCart(product: Product): void {
-    console.log(`addProductToCart is called with ${product.name} `);
     this.shoppingCartService.addItem(product, 1);
-    console.log(`{{product.name}} added to the cart.`);
   }
   public removeProductFromCart(product: Product): void {
     this.shoppingCartService.addItem(product, -1);
