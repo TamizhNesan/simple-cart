@@ -21,7 +21,7 @@ export class DeliveryOptionsService extends CachcingServiceBase {
           .get<DeliveryOption[]>('./assets/delivery-options.json')
           .map(response =>
             response.map(item => {
-              let model = new DeliveryOption();
+              const model = new DeliveryOption();
               model.updateFrom(item);
               return model;
             })
