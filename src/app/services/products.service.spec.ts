@@ -2,11 +2,16 @@ import { async, TestBed, inject, fakeAsync } from '@angular/core/testing';
 import { Injectable, Injector } from '@angular/core';
 
 import { ProductsService } from './products.service';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import {
+  HttpClient,
+  HttpClientModule,
+  HttpErrorResponse
+} from '@angular/common/http';
 import {
   XHRBackend,
   Response,
   Http,
+  HttpModule,
   ResponseOptions,
   ConnectionBackend,
   RequestOptions,
@@ -15,6 +20,7 @@ import {
 import { MockBackend, MockConnection } from '@angular/http/testing';
 import { Product } from '../models/product.model';
 import { Ingredient } from '../models/ingredient.model';
+import { asyncData, asyncError } from '../testing/async-observable-helpers';
 
 describe('ProductsService', () => {
   let httpClientSpy: { get: jasmine.Spy };
@@ -40,62 +46,44 @@ describe('ProductsService', () => {
 });
 
 describe('ProductsService', () => {
+  let httpClientSpy: { get: jasmine.Spy };
+
+  let service: ProductsService;
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      imports: [HttpClientModule],
-      providers: [
-        ProductsService,
-        { provide: XHRBackend, useClass: MockBackend }
-      ]
-    });
+    httpClientSpy = jasmine.createSpyObj('HttpClient', ['get']);
+    service = new ProductsService(<any>httpClientSpy);
   });
 
-  fit(
-    'should be injectable',
-    inject([ProductsService], (service: ProductsService) => {
-      console.log('product service expected tobe truthy');
-      expect(service).toBeTruthy();
-    })
-  );
-
   describe('all()', () => {
-    fit(
-      'should call the correct http endpoint',
-      inject(
-        [ProductsService, XHRBackend],
-        (service: ProductsService, mockBackend: MockBackend) => {
-          console.log('mockbackend.connections' + mockBackend.connections);
-          mockBackend.connections.subscribe((conn: MockConnection) => {
-            console.log('conn: ' + conn.readyState);
-            this.lastConnection = conn;
+    it('should return expected products, httpclient called once', () => {
+      httpClientSpy.get.and.returnValue(asyncData(createProducts(2)));
 
-            console.log('last connection: ' + this.lastConnection);
+      service.all().subscribe(products => {
+        expect(products.length).toEqual(2, 'product count : 2');
+        expect(products[0].id).toBe('0', 'first product id : 0');
+        expect(products[1].id).toBe('1', 'seccond product Id: 1');
+        console.log('product.length: ' + products.length);
 
-            expect(this.lastConnection.request.url).toEqual(
-              './assets/product.json'
-            );
+        expect(httpClientSpy.get.calls.count()).toBe(1, 'one call');
+      });
+    });
 
-            this.lastConnection.mockRespond(
-              new Response(
-                new ResponseOptions({
-                  body: JSON.stringify(createProducts(2))
-                })
-              )
-            );
-          });
+    it('should return an error when the server returns a 404', () => {
+      const errorResponse = new HttpErrorResponse({
+        error: 'test 404 error',
+        status: 404,
+        statusText: 'Not Found'
+      });
 
-          service.all().subscribe(products => {
-            console.log('service.all()');
-            expect(1).toEqual(products.length);
+      httpClientSpy.get.and.returnValue(asyncError(errorResponse));
 
-            expect(products.length).toEqual(2);
-            expect(products[0].id).toBe('0');
-            expect(products[1].id).toBe('1');
-            console.log('product.length: ' + products.length);
-          });
-        } ///
-      )
-    );
+      service
+        .all()
+        .subscribe(
+          products => fail('expected an error, not products'),
+          error => expect(error.message).toContain('404 Not Found')
+        );
+    });
   });
 });
 
